@@ -126,8 +126,8 @@ def colour_distance(rgb_1, rgb_2):
     :param rgb_2: rgb颜色值
     :return:
     """
-    R_1, G_1, B_1= rgb_1
-    R_2, G_2, B_2= rgb_2
+    R_1, G_1, B_1 = rgb_1
+    R_2, G_2, B_2 = rgb_2
     rmean = (R_1 + R_2) / 2
     R = R_1 - R_2
     G = G_1 - G_2
@@ -136,27 +136,33 @@ def colour_distance(rgb_1, rgb_2):
 
 
 def sort_hero_by_color():
+    global base_color = convert_color(sRGBColor(0,0,0), LabColor, target_illuminant='d50')
     img_list = get_all_hero_img()
     obj_list = []
-    base_color = convert_color(sRGBColor(0, 0, 0), LabColor, target_illuminant='d50')
-    for img in img_list:
+    for index, img in enumerate(img_list):
         dominant_color = get_dominant_color_by_color_thief(img)
+        rgb = sRGBColor(dominant_color[0], dominant_color[1], dominant_color[2])
+        # if index == 0:
+        #    base_color = convert_color(rgb, LabColor, target_illuminant='d50')
 
-        delta_e = colour_distance(dominant_color, (0, 0, 0))
-
-        # rgb = sRGBColor(dominant_color[0], dominant_color[1], dominant_color[2])
-        # target_color = convert_color(rgb, LabColor, target_illuminant='d50')
-        # delta_e = delta_e_cie2000(target_color, base_color)
-
+        target_color = convert_color(rgb, LabColor, target_illuminant='d50')
+        delta_e = delta_e_cie2000(target_color, base_color, Kh=2)
         c = (img, dominant_color, delta_e)
+        # print(index, c)
+
+        # 通过欧氏距离
+        # distance = colour_distance(dominant_color, (0, 0, 0))
+        # c = (img, dominant_color, distance)
+
         obj_list.append(c)
 
     obj_list = sorted(obj_list, key=lambda obj: obj[2])
     i_list = []
     c_list = []
-    for color in obj_list:
-        i_list.append(color[0])
-        c_list.append(color[1])
+    for obj in obj_list:
+        print(obj)
+        i_list.append(obj[0])
+        c_list.append(obj[1])
 
     merge_image(i_list)
     gen_dominant_color_img(c_list)
